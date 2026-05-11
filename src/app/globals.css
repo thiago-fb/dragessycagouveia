@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-cream: #F5EFE6;
+  --brand-bronze: #8B5E3C;
+  --brand-gold: #C9A96E;
+  --brand-white: #FDFAF6;
+  --brand-dark: #3D2B1F;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--brand-cream);
+  color: var(--brand-dark);
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+/* ── Hero animations ──────────────────────────────── */
+@keyframes avatarAppear {
+  from { opacity: 0; transform: translateX(-10px) scale(0.7); }
+  to   { opacity: 1; transform: translateX(0)     scale(1);   }
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* ─────────────────────────────────────────────────── */
+
+/* ── Aurora wave effect ────────────────────────────── */
+@keyframes aurora-shift {
+  from { background-position: 0% 50%, 0% 50%; }
+  to   { background-position: 200% 50%, 200% 50%; }
+}
+
+.aurora-waves {
+  position: absolute;
+  inset: -10px;
+  pointer-events: none;
+  filter: blur(12px);
+  will-change: background-position;
+  opacity: 0.55;
+  background-image:
+    repeating-linear-gradient(
+      100deg,
+      #F5EFE6  0%,  #F5EFE6  6%,
+      transparent  9%,  transparent 11%,
+      #F5EFE6 14%
+    ),
+    repeating-linear-gradient(
+      100deg,
+      #E8DAD0 10%,
+      #DCCEC3 16%,
+      #D0C2B6 22%,
+      #EDE5DC 28%,
+      #E2D6CB 34%
+    );
+  background-size: 300% 200%, 200% 150%;
+  background-position: 0% 50%, 0% 50%;
+  animation: aurora-shift 18s linear infinite;
+  mask-image: radial-gradient(ellipse at 80% 0%, black 20%, transparent 75%);
+}
+
+.aurora-waves::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      100deg,
+      #F5EFE6  0%,  #F5EFE6  6%,
+      transparent  9%,  transparent 11%,
+      #F5EFE6 14%
+    ),
+    repeating-linear-gradient(
+      100deg,
+      #E8DAD0 10%,
+      #DCCEC3 16%,
+      #D0C2B6 22%,
+      #EDE5DC 28%,
+      #E2D6CB 34%
+    );
+  background-size: 180% 120%, 150% 100%;
+  background-attachment: fixed;
+  mix-blend-mode: multiply;
+  animation: aurora-shift 10s linear infinite reverse;
+}
+/* ─────────────────────────────────────────────────── */
+
+@layer components {
+  .section-padding {
+    @apply px-6 py-20 md:py-28;
+  }
+
+  .container-narrow {
+    @apply max-w-5xl mx-auto;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center gap-2 bg-brand-bronze text-brand-white px-8 py-4
+           font-jost font-medium tracking-widest uppercase text-sm
+           hover:bg-brand-dark transition-colors duration-300 cursor-pointer;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 border border-brand-bronze text-brand-bronze px-8 py-4
+           font-jost font-medium tracking-widest uppercase text-sm
+           hover:bg-brand-bronze hover:text-brand-white transition-colors duration-300 cursor-pointer;
+  }
+
+  .section-tag {
+    @apply text-brand-bronze/60 text-xs tracking-[0.3em] uppercase font-jost mb-4 block;
+  }
+
+  .section-title {
+    @apply font-playfair text-4xl md:text-5xl text-brand-dark leading-tight;
+  }
+}
