@@ -17,6 +17,10 @@ export const metadata: Metadata = {
     'Procedimentos estéticos minimamente invasivos com resultados naturais e harmoniosos. Toxina Botulínica, Harmonização Facial, Preenchimento Labial e mais. Maceió, Alagoas.',
   keywords:
     'estética avançada Maceió, toxina botulínica Maceió, botox Maceió, harmonização facial Maceió, Gessyca Gouveia',
+  icons: {
+    icon: '/images/favicon.png',
+    apple: '/images/favicon.png',
+  },
   openGraph: {
     title: 'Gessyca Gouveia — Estética Avançada em Maceió',
     description: 'Resultados que respeitam sua essência.',
