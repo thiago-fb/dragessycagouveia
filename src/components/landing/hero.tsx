@@ -28,17 +28,23 @@ const CLIENT_IMAGES = [
 ]
 
 export function Hero({ linha1, linha2Bold, linha3, subtitulo, whatsappLink }: HeroProps) {
-  const [count, setCount]       = useState(0)
-  const [fontSize, setFontSize] = useState(0)
-  const belezaRef               = useRef<HTMLSpanElement>(null)
-  const sectionRef              = useRef<HTMLDivElement>(null)
-  const imgRef                  = useRef<HTMLImageElement>(null)
-  const frameRef                = useRef(0)
+  const [count, setCount]           = useState(0)
+  const [fontSize, setFontSize]     = useState(0)
+  const [framesReady, setFramesReady] = useState(false)
+  const belezaRef                   = useRef<HTMLSpanElement>(null)
+  const sectionRef                  = useRef<HTMLDivElement>(null)
+  const imgRef                      = useRef<HTMLImageElement>(null)
+  const frameRef                    = useRef(0)
 
-  /* ── Pré-carrega todos os frames ─────────────────── */
+  /* ── Pré-carrega todos os frames e só ativa a animação quando prontos ── */
   useEffect(() => {
+    let loaded = 0
     FRAME_SRCS.forEach(src => {
       const img = new window.Image()
+      img.onload = img.onerror = () => {
+        loaded++
+        if (loaded >= FRAME_SRCS.length) setFramesReady(true)
+      }
       img.src = src
     })
   }, [])
