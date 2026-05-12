@@ -70,13 +70,7 @@ export function About({
     willChange: 'transform' as const,
   })
 
-  const scrollOnly = (exitPx: number) => ({
-    transform: `translateY(${-progress * exitPx}px)`,
-    transition: 'transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-    willChange: 'transform' as const,
-  })
-
-  const imgPrincipal = imagemPrincipal || '/images/gessyca-sobre.jpg'
+const imgPrincipal = imagemPrincipal || '/images/gessyca-sobre.jpg'
   const imgProc      = imagemProc      || '/images/procedimento-sobre.jpg'
 
   const pillItems = [pill1, pill2]
@@ -177,24 +171,6 @@ export function About({
                 ))}
               </div>
 
-              {/* Pills — mobile: abaixo da imagem, sem mouse parallax */}
-              <div style={scrollOnly(380)} className="flex md:hidden flex-col gap-2 mt-4">
-                {pillItems.map((text, i) => (
-                  <button
-                    key={i}
-                    className={`group flex items-center gap-2 rounded-full pl-2 pr-5 py-2 shadow-md self-start
-                      hover:bg-brand-dark hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300
-                      ${i === 0 ? 'bg-[#A77A59]' : 'bg-[#A77A59]/75 backdrop-blur-sm'}`}
-                  >
-                    <span className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-colors duration-300" style={{ backgroundColor: '#F6E5D5' }}>
-                      <ArrowUpRight size={13} className="group-hover:rotate-12 transition-transform duration-300" style={{ color: '#86593C' }} />
-                    </span>
-                    <span className="font-jost text-[13px] font-medium text-brand-white whitespace-nowrap">
-                      {text}
-                    </span>
-                  </button>
-                ))}
-              </div>
 
             </div>
           </div>
