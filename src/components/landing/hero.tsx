@@ -17,7 +17,7 @@ const TOTAL_FRAMES = 40
 const SCROLL_EXTRA = 1440 // px de scroll para animar os 24 frames
 
 const FRAME_SRCS = Array.from({ length: TOTAL_FRAMES }, (_, i) =>
-  `/images/hero-banner/ezgif-frame-${String(i + 1).padStart(3, '0')}.jpg`
+  `/images/hero-banner/frame-${String(i + 1).padStart(3, '0')}.jpg`
 )
 
 const CLIENT_IMAGES = [
