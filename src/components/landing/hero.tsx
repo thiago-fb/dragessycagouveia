@@ -111,7 +111,7 @@ export function Hero({ linha1, linha2Bold, linha3, subtitulo, whatsappLink }: He
       ref={sectionRef}
       id="inicio"
       className="relative"
-      style={{ height: `calc(100vh + ${SCROLL_EXTRA}px)` }}
+      style={{ height: framesReady ? `calc(100vh + ${SCROLL_EXTRA}px)` : '100vh' }}
     >
       {/* ── Área sticky — permanece visível durante o scroll ── */}
       <div className="sticky top-0 h-screen overflow-hidden">
