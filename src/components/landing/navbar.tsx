@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { Calendar } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { CTAButton } from '@/components/cta-button'
 
 interface NavbarProps {
   whatsappLink: string
@@ -68,10 +69,8 @@ export function Navbar({ whatsappLink }: NavbarProps) {
         </nav>
 
         {/* CTA */}
-        <a
-          href={whatsappLink}
-          target="_blank"
-          rel="noopener noreferrer"
+        <CTAButton
+          whatsappLink={whatsappLink}
           className="group hidden md:inline-flex items-center gap-2.5 bg-brand-dark text-brand-white
                      rounded-full px-5 py-2.5 font-jost font-medium text-sm
                      hover:bg-brand-bronze hover:scale-105 hover:shadow-lg
@@ -82,7 +81,7 @@ export function Navbar({ whatsappLink }: NavbarProps) {
             <Calendar size={13} />
           </span>
           Agendar Avaliação
-        </a>
+        </CTAButton>
 
       </div>
     </header>
