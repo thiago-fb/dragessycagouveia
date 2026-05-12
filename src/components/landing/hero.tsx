@@ -13,7 +13,7 @@ interface HeroProps {
   whatsappLink: string
 }
 
-const TOTAL_FRAMES = 24
+const TOTAL_FRAMES = 40
 const SCROLL_EXTRA = 1440 // px de scroll para animar os 24 frames
 
 const FRAME_SRCS = Array.from({ length: TOTAL_FRAMES }, (_, i) =>
