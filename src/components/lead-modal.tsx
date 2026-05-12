@@ -45,9 +45,13 @@ export function LeadModal({ open, onClose, whatsappLink, onSubmitSuccess }: Lead
     setForm((prev) => ({ ...prev, telefone: formatTelefone(e.target.value) }))
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault()
     setStatus('loading')
+
+    // Abre o WhatsApp aqui, antes de qualquer await — obrigatório no mobile
+    // para não ser bloqueado como popup pelo navegador
+    window.open(whatsappLink, '_blank', 'noopener,noreferrer')
 
     try {
       const res = await fetch('/api/leads', {
@@ -62,7 +66,6 @@ export function LeadModal({ open, onClose, whatsappLink, onSubmitSuccess }: Lead
       onSubmitSuccess?.()
 
       setTimeout(() => {
-        window.open(whatsappLink, '_blank', 'noopener,noreferrer')
         onClose()
         setForm({ nome: '', email: '', telefone: '' })
         setStatus('idle')
