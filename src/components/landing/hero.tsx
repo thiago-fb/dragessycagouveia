@@ -13,6 +13,13 @@ interface HeroProps {
   whatsappLink: string
 }
 
+const TOTAL_FRAMES = 24
+const SCROLL_EXTRA = 1440 // px de scroll para animar os 24 frames
+
+const FRAME_SRCS = Array.from({ length: TOTAL_FRAMES }, (_, i) =>
+  `/images/hero-banner/ezgif-frame-${String(i + 1).padStart(3, '0')}.jpg`
+)
+
 const CLIENT_IMAGES = [
   '/images/cliente-1.png',
   '/images/cliente-2.png',
@@ -21,14 +28,40 @@ const CLIENT_IMAGES = [
 ]
 
 export function Hero({ linha1, linha2Bold, linha3, subtitulo, whatsappLink }: HeroProps) {
-  const [scrollY, setScrollY]   = useState(0)
   const [count, setCount]       = useState(0)
   const [fontSize, setFontSize] = useState(0)
   const belezaRef               = useRef<HTMLSpanElement>(null)
+  const sectionRef              = useRef<HTMLDivElement>(null)
+  const imgRef                  = useRef<HTMLImageElement>(null)
+  const frameRef                = useRef(0)
 
-  /* ── scroll parallax ─────────────────────────────── */
+  /* ── Pré-carrega todos os frames ─────────────────── */
   useEffect(() => {
-    const onScroll = () => setScrollY(window.scrollY)
+    FRAME_SRCS.forEach(src => {
+      const img = new window.Image()
+      img.src = src
+    })
+  }, [])
+
+  /* ── Scroll → frame animation ────────────────────── */
+  useEffect(() => {
+    const onScroll = () => {
+      const el  = sectionRef.current
+      const img = imgRef.current
+      if (!el || !img) return
+
+      const scrollable = el.offsetHeight - window.innerHeight
+      if (scrollable <= 0) return
+
+      const progress = Math.max(0, Math.min(1, (window.scrollY - el.offsetTop) / scrollable))
+      const newFrame  = Math.min(TOTAL_FRAMES - 1, Math.floor(progress * TOTAL_FRAMES))
+
+      if (newFrame !== frameRef.current) {
+        frameRef.current = newFrame
+        img.src = FRAME_SRCS[newFrame]
+      }
+    }
+
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
@@ -67,23 +100,24 @@ export function Hero({ linha1, linha2Bold, linha3, subtitulo, whatsappLink }: He
     return () => clearTimeout(delay)
   }, [])
 
-  const bg      = { transform: `translateY(${scrollY * 0.45}px)`, willChange: 'transform' as const }
-  const content = { transform: `translateY(${-scrollY * 0.08}px)`, willChange: 'transform' as const }
-  const badge   = { transform: `translateY(${-scrollY * 0.18}px)`, willChange: 'transform' as const }
-  const beleza  = { transform: `translateY(${-scrollY * 0.32}px)`, willChange: 'transform' as const }
-
   return (
-    <>
-      <section id="inicio" className="relative h-screen overflow-hidden">
+    <section
+      ref={sectionRef}
+      id="inicio"
+      className="relative"
+      style={{ height: `calc(100vh + ${SCROLL_EXTRA}px)` }}
+    >
+      {/* ── Área sticky — permanece visível durante o scroll ── */}
+      <div className="sticky top-0 h-screen overflow-hidden">
 
-        {/* ── Background ─────────────────────────────── */}
-        <div style={bg} className="absolute inset-0 scale-125 origin-top">
-          <Image
-            src="/images/bg-hero-banner.png"
+        {/* ── Background: sequência de frames ─────────── */}
+        <div className="absolute inset-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            ref={imgRef}
+            src={FRAME_SRCS[0]}
             alt=""
-            fill
-            className="object-cover object-center"
-            priority
+            className="w-full h-full object-cover object-center"
           />
         </div>
 
@@ -92,7 +126,7 @@ export function Hero({ linha1, linha2Bold, linha3, subtitulo, whatsappLink }: He
 
         {/* ── Content ────────────────────────────────── */}
         <div
-          style={{ ...content, animation: 'fadeSlideUp 0.9s ease-out both' }}
+          style={{ animation: 'fadeSlideUp 0.9s ease-out both' }}
           className="relative z-10 h-full flex items-center"
         >
           <div className="max-w-6xl mx-auto px-6 pt-20 w-full">
@@ -114,12 +148,11 @@ export function Hero({ linha1, linha2Bold, linha3, subtitulo, whatsappLink }: He
                 {subtitulo}
               </p>
 
-              {/* CTA + Social proof — alinhados horizontalmente */}
+              {/* CTA + Social proof */}
               <div
                 className="flex items-center flex-wrap"
                 style={{ gap: '30px', animation: 'fadeSlideUp 0.8s 0.6s ease-out both', opacity: 0 }}
               >
-                {/* CTA button */}
                 <CTAButton
                   whatsappLink={whatsappLink}
                   className="group inline-flex items-center gap-3 bg-brand-dark text-brand-white
@@ -134,9 +167,7 @@ export function Hero({ linha1, linha2Bold, linha3, subtitulo, whatsappLink }: He
                   </span>
                 </CTAButton>
 
-                {/* Social proof badge */}
                 <div
-                  style={badge}
                   className="inline-flex items-center gap-3 bg-white/25 backdrop-blur-md
                              rounded-full px-4 py-2.5 shadow-lg border border-white/30 flex-shrink-0"
                 >
@@ -169,8 +200,6 @@ export function Hero({ linha1, linha2Bold, linha3, subtitulo, whatsappLink }: He
         </div>
 
         {/* ── "beleza" — máscara SVG + blur nas letras ── */}
-
-        {/* SVG mask: define o formato das letras */}
         <svg style={{ position: 'absolute', width: 0, height: 0 }} aria-hidden>
           <defs>
             <mask id="beleza-mask" maskUnits="userSpaceOnUse"
@@ -194,7 +223,6 @@ export function Hero({ linha1, linha2Bold, linha3, subtitulo, whatsappLink }: He
           </defs>
         </svg>
 
-        {/* Span invisível apenas para medir o tamanho da fonte */}
         <div className="absolute bottom-0 left-0 pointer-events-none" style={{ lineHeight: 0.92 }}>
           <span
             ref={belezaRef}
@@ -206,11 +234,9 @@ export function Hero({ linha1, linha2Bold, linha3, subtitulo, whatsappLink }: He
           </span>
         </div>
 
-        {/* Camada com blur aplicado APENAS dentro das letras via máscara */}
         {fontSize > 0 && (
           <div
             style={{
-              ...beleza,
               position: 'absolute',
               bottom: 0,
               left: 0,
@@ -227,8 +253,7 @@ export function Hero({ linha1, linha2Bold, linha3, subtitulo, whatsappLink }: He
           />
         )}
 
-      </section>
-
-    </>
+      </div>
+    </section>
   )
 }

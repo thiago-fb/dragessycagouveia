@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import { BarChart2, Settings, LogOut, Users } from 'lucide-react'
+import { BarChart2, Settings, LogOut, Users, ShieldCheck } from 'lucide-react'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -36,6 +36,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/visao-geral',   label: 'Visão Geral',    icon: BarChart2 },
     { href: '/admin/dashboard',     label: 'Leads',          icon: Users },
     { href: '/admin/configuracoes', label: 'Configurações',  icon: Settings },
+    { href: '/admin/usuarios',      label: 'Usuários',       icon: ShieldCheck },
   ]
 
   return (

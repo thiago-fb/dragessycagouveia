@@ -3,24 +3,28 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { toEmail } from '@/lib/admin-auth'
 import { Loader2 } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [error, setError]       = useState('')
+  const [loading, setLoading]   = useState(false)
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault()
     setError('')
     setLoading(true)
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { error } = await supabase.auth.signInWithPassword({
+      email: toEmail(username),
+      password,
+    })
 
     if (error) {
-      setError('E-mail ou senha incorretos.')
+      setError('Usuário ou senha incorretos.')
       setLoading(false)
       return
     }
@@ -41,15 +45,17 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block font-jost text-xs tracking-widest uppercase text-brand-bronze/70 mb-2">
-              E-mail
+              Usuário
             </label>
             <input
-              type="email"
+              type="text"
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="username"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              placeholder="Usuário"
               className="w-full border border-brand-cream bg-brand-cream focus:border-brand-bronze focus:bg-brand-white
-                         outline-none px-4 py-3 font-jost text-sm text-brand-dark transition-colors"
+                         outline-none px-4 py-3 font-jost text-sm text-brand-dark placeholder:text-brand-dark/30 transition-colors"
             />
           </div>
 
@@ -60,8 +66,9 @@ export default function LoginPage() {
             <input
               type="password"
               required
+              autoComplete="current-password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               className="w-full border border-brand-cream bg-brand-cream focus:border-brand-bronze focus:bg-brand-white
                          outline-none px-4 py-3 font-jost text-sm text-brand-dark transition-colors"
             />
