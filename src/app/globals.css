@@ -121,3 +121,8 @@ body {
     @apply font-playfair text-4xl md:text-5xl text-brand-dark leading-tight;
   }
 }
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
