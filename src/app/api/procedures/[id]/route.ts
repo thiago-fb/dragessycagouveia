@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase-server'
+import { verifyAuth } from '@/lib/verify-auth'
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!(await verifyAuth(req))) {
+    return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 })
+  }
+
   try {
     const { id } = await params
     const { nome, descricao, ordem } = await req.json()
@@ -25,9 +30,13 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!(await verifyAuth(req))) {
+    return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 })
+  }
+
   try {
     const { id } = await params
     const supabase = createServerClient()

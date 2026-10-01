@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { X, Loader2 } from 'lucide-react'
+import { normalizeLead, validateLead, type LeadErrors } from '@/lib/lead-validation'
 
 interface LeadModalProps {
   open: boolean
@@ -11,16 +12,11 @@ interface LeadModalProps {
   onSubmitSuccess?: () => void
 }
 
-interface FormState {
-  nome: string
-  email: string
-  telefone: string
-}
-
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
 export function LeadModal({ open, onClose, whatsappLink, onSubmitSuccess }: LeadModalProps) {
-  const [form, setForm]     = useState<FormState>({ nome: '', email: '', telefone: '' })
+  const [form, setForm]     = useState({ nome: '', email: '', telefone: '' })
+  const [errors, setErrors] = useState<LeadErrors>({})
   const [status, setStatus] = useState<Status>('idle')
   const [mounted, setMounted] = useState(false)
 
@@ -29,11 +25,14 @@ export function LeadModal({ open, onClose, whatsappLink, onSubmitSuccess }: Lead
   if (!open || !mounted) return null
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+    const { name, value } = e.target
+    setForm((prev) => ({ ...prev, [name]: value }))
+    setErrors((prev) => ({ ...prev, [name]: undefined }))
   }
 
   function formatTelefone(value: string) {
     const digits = value.replace(/\D/g, '').slice(0, 11)
+    if (!digits) return ''
     if (digits.length <= 2) return `(${digits}`
     if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`
     if (digits.length <= 11)
@@ -43,10 +42,28 @@ export function LeadModal({ open, onClose, whatsappLink, onSubmitSuccess }: Lead
 
   function handleTelefone(e: React.ChangeEvent<HTMLInputElement>) {
     setForm((prev) => ({ ...prev, telefone: formatTelefone(e.target.value) }))
+    setErrors((prev) => ({ ...prev, telefone: undefined }))
+  }
+
+  // Valida ao sair do campo, só se já tiver algo digitado
+  function handleBlur(e: React.FocusEvent<HTMLInputElement>) {
+    const name = e.target.name as keyof LeadErrors
+    if (!form[name].trim()) return
+    setErrors((prev) => ({ ...prev, [name]: validateLead(normalizeLead(form))[name] }))
   }
 
   async function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault()
+
+    const lead = normalizeLead(form)
+    const validationErrors = validateLead(lead)
+    setErrors(validationErrors)
+    if (Object.keys(validationErrors).length > 0) {
+      const first = Object.keys(validationErrors)[0]
+      document.getElementById(first)?.focus()
+      return
+    }
+
     setStatus('loading')
 
     // Abre o WhatsApp aqui, antes de qualquer await — obrigatório no mobile
@@ -57,7 +74,7 @@ export function LeadModal({ open, onClose, whatsappLink, onSubmitSuccess }: Lead
       const res = await fetch('/api/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(lead),
       })
 
       if (!res.ok) throw new Error('Erro ao salvar')
@@ -68,6 +85,7 @@ export function LeadModal({ open, onClose, whatsappLink, onSubmitSuccess }: Lead
       setTimeout(() => {
         onClose()
         setForm({ nome: '', email: '', telefone: '' })
+        setErrors({})
         setStatus('idle')
       }, 1000)
     } catch {
@@ -77,6 +95,12 @@ export function LeadModal({ open, onClose, whatsappLink, onSubmitSuccess }: Lead
   }
 
   const isLoading = status === 'loading'
+
+  function inputClass(error?: string) {
+    return `w-full border bg-brand-cream focus:bg-brand-white outline-none px-4 py-3 font-jost text-sm
+            text-brand-dark placeholder:text-brand-dark/30 transition-colors
+            ${error ? 'border-red-400 focus:border-red-500' : 'border-brand-cream focus:border-brand-bronze'}`
+  }
 
   return createPortal(
     <>
@@ -111,7 +135,7 @@ export function LeadModal({ open, onClose, whatsappLink, onSubmitSuccess }: Lead
           </div>
 
           {/* Formulário */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} noValidate className="space-y-5">
             <div>
               <label
                 htmlFor="nome"
@@ -127,10 +151,14 @@ export function LeadModal({ open, onClose, whatsappLink, onSubmitSuccess }: Lead
                 value={form.nome}
                 onChange={handleChange}
                 placeholder="Seu nome"
-                className="w-full border border-brand-cream bg-brand-cream focus:border-brand-bronze focus:bg-brand-white
-                           outline-none px-4 py-3 font-jost text-sm text-brand-dark placeholder:text-brand-dark/30
-                           transition-colors"
+                aria-invalid={!!errors.nome}
+                aria-describedby={errors.nome ? 'nome-erro' : undefined}
+                onBlur={handleBlur}
+                className={inputClass(errors.nome)}
               />
+              {errors.nome && (
+                <p id="nome-erro" className="font-jost text-xs text-red-500 mt-1.5">{errors.nome}</p>
+              )}
             </div>
 
             <div>
@@ -148,10 +176,14 @@ export function LeadModal({ open, onClose, whatsappLink, onSubmitSuccess }: Lead
                 value={form.email}
                 onChange={handleChange}
                 placeholder="seu@email.com"
-                className="w-full border border-brand-cream bg-brand-cream focus:border-brand-bronze focus:bg-brand-white
-                           outline-none px-4 py-3 font-jost text-sm text-brand-dark placeholder:text-brand-dark/30
-                           transition-colors"
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? 'email-erro' : undefined}
+                onBlur={handleBlur}
+                className={inputClass(errors.email)}
               />
+              {errors.email && (
+                <p id="email-erro" className="font-jost text-xs text-red-500 mt-1.5">{errors.email}</p>
+              )}
             </div>
 
             <div>
@@ -169,10 +201,14 @@ export function LeadModal({ open, onClose, whatsappLink, onSubmitSuccess }: Lead
                 value={form.telefone}
                 onChange={handleTelefone}
                 placeholder="(82) 9 9999-9999"
-                className="w-full border border-brand-cream bg-brand-cream focus:border-brand-bronze focus:bg-brand-white
-                           outline-none px-4 py-3 font-jost text-sm text-brand-dark placeholder:text-brand-dark/30
-                           transition-colors"
+                aria-invalid={!!errors.telefone}
+                aria-describedby={errors.telefone ? 'telefone-erro' : undefined}
+                onBlur={handleBlur}
+                className={inputClass(errors.telefone)}
               />
+              {errors.telefone && (
+                <p id="telefone-erro" className="font-jost text-xs text-red-500 mt-1.5">{errors.telefone}</p>
+              )}
             </div>
 
             {/* Feedback de erro */}

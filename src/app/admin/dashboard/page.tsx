@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { authFetch } from '@/lib/auth-fetch'
 import { Download, Search, Plus, Pencil, Trash2, X, Loader2, Check } from 'lucide-react'
 
 interface Lead {
@@ -40,7 +41,7 @@ export default function DashboardPage() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
 
   async function fetchLeads() {
-    const res = await fetch('/api/leads')
+    const res = await authFetch('/api/leads')
     const data = await res.json()
     setLeads(Array.isArray(data) ? data : [])
     setLoading(false)
@@ -104,18 +105,22 @@ export default function DashboardPage() {
       const url = modalMode === 'edit' ? `/api/leads/${editingId}` : '/api/leads'
       const method = modalMode === 'edit' ? 'PATCH' : 'POST'
 
-      const res = await fetch(url, {
+      const res = await authFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       })
 
-      if (!res.ok) throw new Error()
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        const firstError = data.errors && Object.values(data.errors)[0]
+        throw new Error(typeof firstError === 'string' ? firstError : undefined)
+      }
 
       await fetchLeads()
       closeModal()
-    } catch {
-      setSaveError('Erro ao salvar. Tente novamente.')
+    } catch (err) {
+      setSaveError((err as Error).message || 'Erro ao salvar. Tente novamente.')
     } finally {
       setSaving(false)
     }
@@ -124,7 +129,7 @@ export default function DashboardPage() {
   async function handleDelete(id: string) {
     setDeletingId(id)
     try {
-      await fetch(`/api/leads/${id}`, { method: 'DELETE' })
+      await authFetch(`/api/leads/${id}`, { method: 'DELETE' })
       setLeads((prev) => prev.filter((l) => l.id !== id))
     } finally {
       setDeletingId(null)

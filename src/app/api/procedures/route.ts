@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase-server'
+import { verifyAuth } from '@/lib/verify-auth'
 
 export async function GET() {
   try {
@@ -17,6 +18,10 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  if (!(await verifyAuth(req))) {
+    return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 })
+  }
+
   try {
     const { nome, descricao, ordem } = await req.json()
     if (!nome?.trim() || !descricao?.trim()) {

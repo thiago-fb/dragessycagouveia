@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { authFetch } from '@/lib/auth-fetch'
 import {
   Loader2, Save, CheckCircle, Plus, Pencil, Trash2,
   X, Check, Upload, ImageIcon,
@@ -139,7 +140,7 @@ function ImageUploader({
       const form = new FormData()
       form.append('file', file)
       form.append('slot', slot)
-      const res  = await fetch('/api/upload', { method: 'POST', body: form })
+      const res  = await authFetch('/api/upload', { method: 'POST', body: form })
       const data = await res.json()
       if (data.url) onChange(data.url)
     } finally {
@@ -202,8 +203,8 @@ export default function ConfiguracoesPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/config').then((r) => r.json()),
-      fetch('/api/procedures').then((r) => r.json()),
+      authFetch('/api/config').then((r) => r.json()),
+      authFetch('/api/procedures').then((r) => r.json()),
     ]).then(([cfg, procs]) => {
       setConfig(cfg ?? {})
       setProcedures(Array.isArray(procs) ? procs : [])
@@ -218,7 +219,7 @@ export default function ConfiguracoesPage() {
   async function handleSaveConfig() {
     setSaveStatus('saving')
     try {
-      const res = await fetch('/api/config', {
+      const res = await authFetch('/api/config', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(config),
@@ -249,7 +250,7 @@ export default function ConfiguracoesPage() {
     setProcSaving(true)
     try {
       if (editProc) {
-        await fetch(`/api/procedures/${editProc.id}`, {
+        await authFetch(`/api/procedures/${editProc.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...procForm, ordem: editProc.ordem }),
@@ -258,7 +259,7 @@ export default function ConfiguracoesPage() {
           prev.map((p) => p.id === editProc.id ? { ...p, ...procForm } : p)
         )
       } else {
-        const res  = await fetch('/api/procedures', {
+        const res  = await authFetch('/api/procedures', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...procForm, ordem: procedures.length + 1 }),
@@ -275,7 +276,7 @@ export default function ConfiguracoesPage() {
   async function handleDeleteProc(id: string) {
     setDeletingId(id)
     try {
-      await fetch(`/api/procedures/${id}`, { method: 'DELETE' })
+      await authFetch(`/api/procedures/${id}`, { method: 'DELETE' })
       setProcedures((prev) => prev.filter((p) => p.id !== id))
     } finally {
       setDeletingId(null)

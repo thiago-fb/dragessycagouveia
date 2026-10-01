@@ -1,22 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase-server'
+import { verifyAuth } from '@/lib/verify-auth'
+import { normalizeLead, validateLead } from '@/lib/lead-validation'
 
 export async function POST(req: NextRequest) {
   try {
-    const { nome, email, telefone } = await req.json()
+    const lead   = normalizeLead(await req.json())
+    const errors = validateLead(lead)
 
-    if (!nome?.trim() || !email?.trim() || !telefone?.trim()) {
-      return NextResponse.json(
-        { error: 'Campos obrigatórios faltando.' },
-        { status: 400 }
-      )
+    if (Object.keys(errors).length > 0) {
+      return NextResponse.json({ error: 'Dados inválidos.', errors }, { status: 400 })
     }
 
     const supabase = createServerClient()
 
     const { error } = await supabase
       .from('leads')
-      .insert({ nome: nome.trim(), email: email.trim(), telefone: telefone.trim() })
+      .insert(lead)
 
     if (error) throw error
 
@@ -27,7 +27,11 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  if (!(await verifyAuth(req))) {
+    return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 })
+  }
+
   try {
     const supabase = createServerClient()
 

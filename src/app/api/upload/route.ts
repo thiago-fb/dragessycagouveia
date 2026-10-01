@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase-server'
+import { verifyAuth } from '@/lib/verify-auth'
 
 export async function POST(req: NextRequest) {
+  if (!(await verifyAuth(req))) {
+    return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 })
+  }
+
   try {
     const form = await req.formData()
     const file = form.get('file') as File | null
