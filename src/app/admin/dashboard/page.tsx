@@ -137,12 +137,19 @@ export default function DashboardPage() {
     }
   }
 
+  // Escapa aspas e neutraliza células que o Excel interpretaria como fórmula (=, +, -, @)
+  function csvCell(value: string) {
+    const safe = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value
+    return `"${safe.replace(/"/g, '""')}"`
+  }
+
   function downloadCSV() {
     const header = 'Nome,Email,Telefone,Data\n'
     const rows = filtered
-      .map((l) => `"${l.nome}","${l.email}","${l.telefone}","${formatDate(l.created_at)}"`)
+      .map((l) => [l.nome, l.email, l.telefone, formatDate(l.created_at)].map(csvCell).join(','))
       .join('\n')
-    const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' })
+    // \uFEFF (BOM) faz o Excel abrir com acentos corretos
+    const blob = new Blob(['\uFEFF' + header + rows], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url

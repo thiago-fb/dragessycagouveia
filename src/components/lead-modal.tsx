@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { X, Loader2 } from 'lucide-react'
 import { normalizeLead, validateLead, type LeadErrors } from '@/lib/lead-validation'
@@ -16,6 +16,7 @@ type Status = 'idle' | 'loading' | 'success' | 'error'
 
 export function LeadModal({ open, onClose, whatsappLink, onSubmitSuccess }: LeadModalProps) {
   const [form, setForm]     = useState({ nome: '', email: '', telefone: '' })
+  const honeypotRef         = useRef<HTMLInputElement>(null)
   const [errors, setErrors] = useState<LeadErrors>({})
   const [status, setStatus] = useState<Status>('idle')
   const [mounted, setMounted] = useState(false)
@@ -74,7 +75,7 @@ export function LeadModal({ open, onClose, whatsappLink, onSubmitSuccess }: Lead
       const res = await fetch('/api/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(lead),
+        body: JSON.stringify({ ...lead, website: honeypotRef.current?.value ?? '' }),
       })
 
       if (!res.ok) throw new Error('Erro ao salvar')
@@ -136,6 +137,16 @@ export function LeadModal({ open, onClose, whatsappLink, onSubmitSuccess }: Lead
 
           {/* Formulário */}
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
+            {/* Honeypot anti-robô: invisível para pessoas, robôs preenchem */}
+            <input
+              ref={honeypotRef}
+              type="text"
+              name="website"
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              className="sr-only"
+            />
             <div>
               <label
                 htmlFor="nome"

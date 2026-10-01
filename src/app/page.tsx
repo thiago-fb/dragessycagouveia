@@ -91,6 +91,7 @@ export default async function Home() {
         tag={config.agenda_tag}
         titulo={config.agenda_titulo}
         subtitulo={config.agenda_subtitulo}
+        botao={config.agenda_botao || DEFAULTS.agenda_botao}
       />
       <Footer
         instagramUrl={config.instagram_url}

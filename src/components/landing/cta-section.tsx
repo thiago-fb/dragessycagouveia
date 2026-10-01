@@ -7,9 +7,10 @@ interface CTASectionProps {
   tag: string
   titulo: string
   subtitulo: string
+  botao: string
 }
 
-export function CTASection({ whatsappLink, horario, tag, titulo, subtitulo }: CTASectionProps) {
+export function CTASection({ whatsappLink, horario, tag, titulo, subtitulo, botao }: CTASectionProps) {
   return (
     <section className="bg-brand-dark section-padding text-center relative overflow-hidden" id="contato">
       <FloatingPaths position={1} />
@@ -31,7 +32,9 @@ export function CTASection({ whatsappLink, horario, tag, titulo, subtitulo }: CT
                      font-jost font-medium tracking-widest uppercase text-sm text-[#663A23]
                      hover:bg-white/90 hover:scale-105 hover:shadow-xl
                      active:scale-95 transition-all duration-300 cursor-pointer"
-        />
+        >
+          {botao}
+        </CTAButton>
       </div>
     </section>
   )

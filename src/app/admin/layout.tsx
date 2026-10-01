@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { isAdminEmail } from '@/lib/admin-auth'
 import { BarChart2, Settings, LogOut, Users, ShieldCheck, Menu, X } from 'lucide-react'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -13,9 +14,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (!data.session && pathname !== '/admin/login') {
+    supabase.auth.getSession().then(async ({ data }) => {
+      const isAdmin = isAdminEmail(data.session?.user.email)
+      // Conta logada que não é do painel: desloga
+      if (data.session && !isAdmin) await supabase.auth.signOut()
+      if (!isAdmin && pathname !== '/admin/login') {
         router.replace('/admin/login')
+        return
       }
       setChecking(false)
     })

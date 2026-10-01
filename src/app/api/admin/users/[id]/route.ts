@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase-server'
 import { verifyAuth } from '@/lib/verify-auth'
+import { isAdminEmail } from '@/lib/admin-auth'
 
 export async function PATCH(
   req: NextRequest,
@@ -17,8 +18,12 @@ export async function PATCH(
     if (!email?.trim() && !password) {
       return NextResponse.json({ error: 'Informe e-mail ou senha para atualizar.' }, { status: 400 })
     }
-    if (password && password.length < 6) {
-      return NextResponse.json({ error: 'A senha deve ter pelo menos 6 caracteres.' }, { status: 400 })
+    if (password && password.length < 8) {
+      return NextResponse.json({ error: 'A senha deve ter pelo menos 8 caracteres.' }, { status: 400 })
+    }
+
+    if (email?.trim() && !isAdminEmail(email)) {
+      return NextResponse.json({ error: 'Usuário inválido. Use letras, números, ponto, hífen ou _.' }, { status: 400 })
     }
 
     const updates: { email?: string; password?: string } = {}

@@ -143,6 +143,7 @@ function ImageUploader({
       const res  = await authFetch('/api/upload', { method: 'POST', body: form })
       const data = await res.json()
       if (data.url) onChange(data.url)
+      else alert(data.error ?? 'Erro ao enviar a imagem.')
     } finally {
       setUploading(false)
       if (inputRef.current) inputRef.current.value = ''
@@ -224,7 +225,11 @@ export default function ConfiguracoesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(config),
       })
-      if (!res.ok) throw new Error()
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        alert(data.error ?? 'Erro ao salvar. Tente novamente.')
+        throw new Error()
+      }
       setSaveStatus('saved')
       setTimeout(() => setSaveStatus('idle'), 3000)
     } catch {

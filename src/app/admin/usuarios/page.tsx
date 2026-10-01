@@ -243,7 +243,7 @@ export default function UsuariosPage() {
                   value={form.password}
                   onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
                   required={modal.mode === 'add'}
-                  placeholder={modal.mode === 'add' ? 'Mínimo 6 caracteres' : 'Deixe em branco para não alterar'}
+                  placeholder={modal.mode === 'add' ? 'Mínimo 8 caracteres' : 'Deixe em branco para não alterar'}
                   className="w-full border border-brand-cream bg-brand-cream focus:border-brand-bronze focus:bg-brand-white
                              outline-none px-4 py-3 font-jost text-sm text-brand-dark placeholder:text-brand-dark/30 transition-colors"
                 />

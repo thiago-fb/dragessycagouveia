@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase-server'
 import { verifyAuth } from '@/lib/verify-auth'
+import { isAdminEmail } from '@/lib/admin-auth'
 
 export async function GET(req: NextRequest) {
   if (!(await verifyAuth(req))) {
@@ -37,8 +38,12 @@ export async function POST(req: NextRequest) {
     if (!email?.trim() || !password) {
       return NextResponse.json({ error: 'E-mail e senha são obrigatórios.' }, { status: 400 })
     }
-    if (password.length < 6) {
-      return NextResponse.json({ error: 'A senha deve ter pelo menos 6 caracteres.' }, { status: 400 })
+    if (password.length < 8) {
+      return NextResponse.json({ error: 'A senha deve ter pelo menos 8 caracteres.' }, { status: 400 })
+    }
+
+    if (!isAdminEmail(email)) {
+      return NextResponse.json({ error: 'Usuário inválido. Use letras, números, ponto, hífen ou _.' }, { status: 400 })
     }
 
     const supabase = createServerClient()
