@@ -31,7 +31,8 @@ DROP POLICY IF EXISTS "procedures_delete" ON public.procedures;
 DROP POLICY IF EXISTS "imagens_auth_insert" ON storage.objects;
 DROP POLICY IF EXISTS "imagens_auth_delete" ON storage.objects;
 
--- Sobras de outro projeto migrado (buckets banners/cadastros, não usados pelo site)
+-- Buckets banners/cadastros: são do site ETOPNET (mesmo projeto Supabase).
+-- Remoção desfeita na 003 — não reaplicar estas linhas.
 DROP POLICY IF EXISTS "Auth upload banners"              ON storage.objects;
 DROP POLICY IF EXISTS "Auth delete banners"              ON storage.objects;
 DROP POLICY IF EXISTS "Auth upload cadastros"            ON storage.objects;
