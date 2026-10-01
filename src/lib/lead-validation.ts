@@ -23,17 +23,21 @@ export function normalizeLead(input: Partial<Record<keyof LeadInput, unknown>>):
   }
 }
 
-export function validateLead(lead: LeadInput): LeadErrors {
+/**
+ * `exigirSobrenome`: o formulário do site exige nome e sobrenome; o painel
+ * admin pode salvar só o primeiro nome.
+ */
+export function validateLead(lead: LeadInput, { exigirSobrenome = true } = {}): LeadErrors {
   const errors: LeadErrors = {}
 
-  // Palavras com 2+ letras — aceita "João D. Souza", rejeita "a" ou "Ana"
+  // Palavras com 2+ letras — aceita "João D. Souza", rejeita "a"
   const palavras = lead.nome.split(' ').filter((p) => p.replace(/[^\p{L}]/gu, '').length >= 2)
   if (!lead.nome) {
     errors.nome = 'Informe seu nome.'
   } else if (lead.nome.length > 100 || !NOME_REGEX.test(lead.nome)) {
     errors.nome = 'Use apenas letras no nome.'
-  } else if (palavras.length < 2) {
-    errors.nome = 'Informe nome e sobrenome.'
+  } else if (palavras.length < (exigirSobrenome ? 2 : 1)) {
+    errors.nome = exigirSobrenome ? 'Informe nome e sobrenome.' : 'Informe o nome.'
   }
 
   if (!lead.email) {

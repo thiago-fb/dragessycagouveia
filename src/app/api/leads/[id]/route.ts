@@ -14,7 +14,7 @@ export async function PATCH(
   try {
     const { id } = await params
     const lead   = normalizeLead(await req.json())
-    const errors = validateLead(lead)
+    const errors = validateLead(lead, { exigirSobrenome: false })
 
     if (Object.keys(errors).length > 0) {
       return NextResponse.json({ error: 'Dados inválidos.', errors }, { status: 400 })

@@ -5,8 +5,10 @@ import { normalizeLead, validateLead } from '@/lib/lead-validation'
 
 export async function POST(req: NextRequest) {
   try {
-    const lead   = normalizeLead(await req.json())
-    const errors = validateLead(lead)
+    // Lead criado pelo admin (logado) pode ter só o primeiro nome
+    const isAdmin = req.headers.has('Authorization') && (await verifyAuth(req))
+    const lead    = normalizeLead(await req.json())
+    const errors  = validateLead(lead, { exigirSobrenome: !isAdmin })
 
     if (Object.keys(errors).length > 0) {
       return NextResponse.json({ error: 'Dados inválidos.', errors }, { status: 400 })
